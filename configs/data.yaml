@@ -1,0 +1,32 @@
+# Data for the complaint-routing decision model. Every reported number depends on
+# these settings.
+
+dataset:
+  repo_id: kgptalkie/cfpb-complaint-routing
+  revision: 3ec70ba3690c26b8d9b117629fa3803ce4e4b84f
+  license: cc0-1.0
+  # Only these files are downloaded (parquet, ~1 MB in total).
+  files:
+    train: data/train.parquet
+    validation: data/validation.parquet
+    test: data/test.parquet
+  expected_rows:
+    train: 2700
+    validation: 270
+    test: 826
+
+training_requests:
+  # The ordered training stream: random.Random(seed); one augmentation draw on the first
+  # training row (discarded); rng.sample(train, num_requests); then one option-subset
+  # augmentation per sampled row, in order. Part of the experiment definition.
+  seed: 7
+  num_requests: 800
+
+output:
+  dir: data/processed
+
+smoke:
+  # Written elsewhere so the canonical data is never touched.
+  dir: data/smoke
+  train_size: 4
+  test_size: 8

@@ -1,0 +1,23 @@
+# Hugging Face publication. Nothing is uploaded unless `make publish` /
+# `decision-model publish --execute` is run deliberately.
+
+# Destination repository, "<user-or-org>/<name>". Must be set before publishing.
+repo_id: null
+private: true
+mode: adapter          # LoRA adapter + head (the only supported mode)
+run_dir: artifacts/runs/m1_air_8gb
+model_card_path: artifacts/exports/model_card/README.md
+staging_dir: artifacts/exports/hf_upload
+commit_message: Upload complaint-routing decision model (LoRA + joint schema head, MLX)
+# License you release the weights under. Confirm it yourself: the base model is
+# apache-2.0 and the data cc0-1.0; the head design follows an apache-2.0 model.
+adapter_license: apache-2.0
+
+# Files copied from the run directory. The self-contained runtime module is added as
+# decision_model_runtime.py so the release can be loaded without this project.
+include:
+  - adapters.safetensors
+  - adapter_config.json
+  - head.safetensors
+  - head_config.json
+  - run_manifest.json

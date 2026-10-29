@@ -1,0 +1,17 @@
+# Evaluation on the 826 held-out test complaints (all 9 routes offered).
+
+test_file: data/processed/test.jsonl
+smoke_test_file: data/smoke/test.jsonl
+output_dir: reports/evaluation
+
+decision:
+  batch_size: 8          # prompts per forward pass
+
+chat_baseline:
+  # The base model asked the same question as a chat, greedy, thinking disabled.
+  max_tokens: 16
+  enable_thinking: false
+
+limits:
+  max_examples: null     # null = the whole test file
+  smoke_max_examples: 8

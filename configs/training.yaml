@@ -1,0 +1,102 @@
+# LoRA + joint schema head, trained with this project's MLX training loop
+# (src/decision_model/training/loop.py). No option is left to library defaults.
+
+model:
+  repo_id: Qwen/Qwen3.5-0.8B
+  # Commit the experiment is pinned to (resolved 2026-10-28).
+  revision: 2fc06364715b967f1860aea9cf38778875588b17
+  license: apache-2.0
+
+head:
+  hidden_size: 1024
+  width: 512
+  routing_layers: 1
+  layers: 2
+  heads: 8
+  feedforward: 2048
+
+# Prompt budget; the complaint (state) is truncated first if a prompt is longer.
+max_length: 4096
+
+lora:
+  rank: 16
+  alpha: 32            # MLX-LM scale = alpha / rank = 2.0
+  dropout: 0.05
+  # Every attention, MLP and linear-attention projection of all 24 blocks.
+  keys:
+    - self_attn.q_proj
+    - self_attn.k_proj
+    - self_attn.v_proj
+    - self_attn.o_proj
+    - mlp.gate_proj
+    - mlp.up_proj
+    - mlp.down_proj
+    - linear_attn.in_proj_qkv
+    - linear_attn.in_proj_z
+    - linear_attn.out_proj
+
+profiles:
+  # The reference recipe: 100 updates of 8 requests, AdamW (weight decay 0.01) with
+  # lr 2e-4 for LoRA and 1e-3 for the head, lr x min(1, (step+1)/20) x cosine,
+  # gradient norm clipped to 1.0. Not validated on an 8 GB machine.
+  reference:
+    kind: full
+    requests_file: data/processed/train_requests.jsonl
+    output_dir: artifacts/runs/reference
+    steps: 100
+    batch_size: 8
+    grad_accumulation_steps: 1
+    lr_lora: 2.0e-4
+    lr_head: 1.0e-3
+    weight_decay: 0.01
+    warmup_steps: 20
+    max_grad_norm: 1.0
+    grad_checkpoint: true
+    log_every: 10
+    save_every: 0          # final weights only
+    seed: 7
+
+  # Same 100 updates of the same 8 requests in the same order, as 8 accumulated
+  # micro-batches of 1 (measured on an M1 / 8 GB: batch 1 peaks at ~3.5-4.3 GB, batch 2
+  # at ~6.5 GB). Slow: MLX-LM trains Qwen3.5's linear-attention layers without their fused
+  # kernel, ~10-20 s per request on an M1 (much slower if the system swaps), so 800
+  # requests take hours. NOT yet validated by a complete run.
+  m1_air_8gb:
+    kind: full
+    requests_file: data/processed/train_requests.jsonl
+    output_dir: artifacts/runs/m1_air_8gb
+    steps: 100
+    batch_size: 1
+    grad_accumulation_steps: 8
+    lr_lora: 2.0e-4
+    lr_head: 1.0e-3
+    weight_decay: 0.01
+    warmup_steps: 20
+    max_grad_norm: 1.0
+    grad_checkpoint: true
+    log_every: 1
+    save_every: 10         # a checkpoint every 10 updates (the run takes many hours)
+    seed: 7
+
+  # Bounded real-training check: 2 updates of 1 request. Proves the loop end to end and
+  # measures memory; the weights it writes are useless.
+  smoke:
+    kind: smoke
+    requests_file: data/smoke/train_requests.jsonl
+    output_dir: artifacts/runs/smoke
+    steps: 2
+    batch_size: 1
+    grad_accumulation_steps: 1
+    lr_lora: 2.0e-4
+    lr_head: 1.0e-3
+    weight_decay: 0.01
+    warmup_steps: 1
+    max_grad_norm: 1.0
+    grad_checkpoint: true
+    log_every: 1
+    save_every: 0
+    seed: 7
+
+safety:
+  smoke_max_steps: 5
+  min_free_disk_gb: 4

@@ -1,0 +1,37 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below, and cite the base model, data and head design it builds on."
+title: "decision-model: a System 1 complaint-routing decision model (Qwen3.5-0.8B + joint schema head) with Apple MLX"
+type: software
+version: 0.1.0
+license: MIT
+authors:
+  - name: "The decision-model project authors"
+references:
+  - type: software
+    title: "Qwen3.5-0.8B"
+    authors:
+      - name: "Qwen Team"
+    url: "https://huggingface.co/Qwen/Qwen3.5-0.8B"
+    license: Apache-2.0
+  - type: dataset
+    title: "CFPB complaint routing (short complaints, 9 products)"
+    authors:
+      - name: "kgptalkie"
+    url: "https://huggingface.co/datasets/kgptalkie/cfpb-complaint-routing"
+    license: CC0-1.0
+  - type: dataset
+    title: "Consumer Complaint Database"
+    authors:
+      - name: "Consumer Financial Protection Bureau"
+    url: "https://www.consumerfinance.gov/data-research/consumer-complaints/"
+  - type: software
+    title: "Clef"
+    authors:
+      - name: "Cloudflare"
+    url: "https://huggingface.co/Cloudflare/clef"
+    license: Apache-2.0
+  - type: software
+    title: "MLX LM"
+    authors:
+      - name: "Apple"
+    url: "https://github.com/ml-explore/mlx-lm"

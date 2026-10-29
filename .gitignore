@@ -1,0 +1,31 @@
+# Python / tooling
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+build/
+dist/
+.DS_Store
+
+# Secrets: never commit tokens. Use `hf auth login` instead.
+.env
+.env.*
+!.env.example
+
+# Generated data (re-create with `make data-prepare` / `make data-smoke`)
+data/processed/
+data/smoke/
+
+# Model artifacts: adapters, fused models, upload staging
+artifacts/
+
+# Run outputs (evaluation records, run manifests, summaries)
+reports/evaluation/
+reports/experiments/
+
+# Notebooks are not part of this project
+*.ipynb
+.ipynb_checkpoints/

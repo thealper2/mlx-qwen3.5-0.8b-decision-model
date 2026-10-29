@@ -1,0 +1,39 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  portable:
+    # Lint, types and the offline unit tests. MLX is not installed on Linux (platform
+    # marker in pyproject.toml), so nothing here can download a model or train.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --frozen
+      - run: uv run --frozen ruff check src tests scripts
+      - run: uv run --frozen ruff format --check src tests scripts
+      - run: uv run --frozen mypy
+      - run: uv run --frozen pytest -m "not macos"
+      - name: Ensure no notebooks are committed
+        run: test -z "$(git ls-files '*.ipynb')"
+
+  macos:
+    # Same tests on Apple Silicon with MLX installed, plus the MLX-LM option check.
+    # Still no model download and no training.
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --frozen
+      - run: uv run --frozen pytest
+      - run: uv run --frozen decision-model config-check
